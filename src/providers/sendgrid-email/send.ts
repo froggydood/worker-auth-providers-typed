@@ -1,7 +1,8 @@
 import { getFixedDigitRandomNumber } from '../../utils/helpers';
 import { ConfigError, UnknownError } from '../../utils/errors';
+import { SendgridEmail } from './types';
 
-async function sendMail({ body, apiKey }) {
+async function sendMail({ body, apiKey }: SendgridEmail.SendMailOptions) {
 	const email = await fetch('https://api.sendgrid.com/v3/mail/send', {
 		body: JSON.stringify(body),
 		headers: {
@@ -12,7 +13,7 @@ async function sendMail({ body, apiKey }) {
 	});
 	return email;
 }
-export default async function send({ options }) {
+export default async function send({ options }: SendgridEmail.SendOptions) {
 	const {
 		from,
 		to,
@@ -33,27 +34,23 @@ export default async function send({ options }) {
 		});
 	}
 
-	const templateContent = templateId
-		? {
-				template_id: templateId
-		  }
-		: {
-				content: [
-					{
-						type: 'text/plain',
-						value: text.replace('{OTP}', otp)
-					}
-				]
-		  };
+	const templateContent = templateId ? {
+		template_id: templateId
+	} : {
+		content: [
+			{
+				type: 'text/plain',
+				value: text.replace('{OTP}', otp)
+			}
+		]
+	};
 
-	const personalizedData = templateId
-		? {
-				dynamic_template_data: dynamicTemplateData
-		  }
-		: {
-				subject
-		  };
-	const body = {
+	const personalizedData = templateId ? {
+		dynamic_template_data: dynamicTemplateData
+	} : {
+		subject
+	};
+	const body: SendgridEmail.SendBody = {
 		from: {
 			email: from
 		},
@@ -72,16 +69,15 @@ export default async function send({ options }) {
 
 	try {
 		const res = await sendMail({ body, apiKey });
-		console.log('[success send]', res);
+		
 		const savedData = await kvProvider.put(to, otp, {
 			expirationTtl
 		});
-		console.log('[savedData]', savedData);
+		
 		return res;
 	} catch (e) {
-		console.log('[error]', e.stack);
 		throw new UnknownError({
-			message: 'e.stack'
+			message: (e as {stack: string})?.stack.toString()
 		});
 	}
 }

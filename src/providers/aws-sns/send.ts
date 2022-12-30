@@ -31,7 +31,7 @@ export default async function send({ options }) {
 
 	const otpMessage = message.replace('{OTP}', otp);
 
-	console.log('[region otp]', phone, region, otp, otpMessage);
+	;
 
 	const params = {
 		Message: otpMessage,
@@ -41,14 +41,14 @@ export default async function send({ options }) {
 
 	try {
 		const data = await client.send(command);
-		console.log('[success send]', data);
+		;
 		const savedData = await kvProvider.put(phone, otp, {
 			expirationTtl
 		});
-		console.log('[savedData]', savedData);
+		;
 		return data;
 	} catch (e) {
-		console.log('[error]', e.stack);
+		;
 		throw new UnknownError({
 			message: 'e.stack'
 		});

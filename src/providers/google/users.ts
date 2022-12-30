@@ -1,9 +1,13 @@
+import { BaseProvider, OAuthTokens } from '../../types';
 import { ConfigError, ProviderGetUserError, TokenError } from '../../utils/errors';
-import { parseQuerystring } from '../../utils/helpers';
+import { checkTokenResponseError, parseQuerystring } from '../../utils/helpers';
+import { Google } from './types';
 
-async function getTokensFromCode(code, { clientId, clientSecret, redirectUrl }) {
-  console.log('[redirectUrl]', redirectUrl);
-
+async function getTokensFromCode(
+	code: string, {
+		clientId, clientSecret, redirectUrl
+	}: BaseProvider.TokensFromCodeOptions
+): Promise<OAuthTokens> {
   const params = {
     client_id: clientId,
     client_secret: clientSecret,
@@ -21,17 +25,11 @@ async function getTokensFromCode(code, { clientId, clientSecret, redirectUrl }) 
     body: JSON.stringify(params),
   });
   const result = await response.json();
-  console.log('[tokens]', result);
-
-  if (result.error) {
-    throw new TokenError({
-      message: result.error_description,
-    });
-  }
-  return result;
+  checkTokenResponseError(result)
+  return result as OAuthTokens;
 }
 
-async function getUser(token) {
+async function getUser(token: string): Promise<Google.UserResponse> {
   try {
     const getUserResponse = await fetch(
       'https://www.googleapis.com/oauth2/v2/userinfo',
@@ -42,19 +40,18 @@ async function getUser(token) {
       },
     );
     const data = await getUserResponse.json();
-    console.log('[provider user data]', data);
-    return data;
+    
+    return data as Google.UserResponse;
   } catch (e) {
-    console.log('[get user error]', e);
     throw new ProviderGetUserError({
       message: 'There was an error fetching the user',
     });
   }
 }
 
-export default async function callback({ options, request }) {
-    const { query }: any = parseQuerystring(request);
-    console.log('[query]', query);
+export default async function callback({ options, request }: BaseProvider.CallbackOptions): Promise<Google.CallbackResponse> {
+    const { query } = parseQuerystring(request);
+    
     if (!query.code) {
       throw new ConfigError({
         message: 'No code is passed!',

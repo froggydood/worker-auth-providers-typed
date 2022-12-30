@@ -1,15 +1,17 @@
 import jwt from '@tsndr/cloudflare-worker-jwt';
 import { ProviderVerifyOtpError } from '../../utils/errors';
+import { get24HourExpiry } from '../../utils/helpers';
+import { MailgunEmail } from './types';
 
-async function generateJWT({ secret, to, claims }) {
+async function generateJWT({ secret, to, claims }: MailgunEmail.JWTOptions) {
 	const customClaims = claims || {
 		id: to
 	};
-	console.log('[claims, scret]', customClaims, secret);
-	return jwt.sign({ exp: '24h', ...customClaims}, secret, { algorithm: 'HS256' });
+	;
+	return jwt.sign({ exp: get24HourExpiry(), ...customClaims}, secret, { algorithm: 'HS256' });
 }
 
-export default async function verify({ options }) {
+export default async function verify({ options }: MailgunEmail.VerifyOptions): Promise<MailgunEmail.VerifyResponse> {
 	const { kvProvider, to, otp, secret, claims } = options;
 
 	const storedOtp = await kvProvider.get(to);
@@ -20,13 +22,13 @@ export default async function verify({ options }) {
 		});
 	}
 
-	const token = secret ? generateJWT({
+	const token = secret ? await generateJWT({
 		secret,
 		to,
 		claims
 	}) : null;
 
-	console.log(token);
+	;
 	await kvProvider.delete(to);
 
 	return token ? {

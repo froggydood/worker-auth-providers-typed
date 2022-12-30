@@ -1,15 +1,17 @@
 import jwt from '@tsndr/cloudflare-worker-jwt';
+import { BaseProvider } from '../../types';
 import { ProviderVerifyOtpError } from '../../utils/errors';
+import { get24HourExpiry } from '../../utils/helpers';
 
-function generateJWT({ secret, phone, claims }) {
+function generateJWT({ secret, phone, claims }: BaseProvider.JWTOptions) {
 	const customClaims = claims || {
 		id: phone
 	};
-	console.log('[claims, scret]', customClaims, secret);
-	return jwt.sign({ exp: '24h', ...customClaims}, secret, { algorithm: 'HS256' });
+	
+	return jwt.sign({ exp: get24HourExpiry(), ...customClaims}, secret, { algorithm: 'HS256' });
 }
 
-export default async function verify({ options }) {
+export default async function verify({ options }: BaseProvider.VerifyOptions) {
 	const { kvProvider, phone, otp, secret, claims } = options;
 
 	const storedOtp = await kvProvider.get(phone);
@@ -26,7 +28,7 @@ export default async function verify({ options }) {
 		claims
 	}) : null;
 
-	console.log(token);
+	;
 	await kvProvider.delete(phone);
 
 	return token ? {

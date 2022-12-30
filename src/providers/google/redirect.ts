@@ -1,7 +1,8 @@
 import * as queryString from 'query-string';
 import { ConfigError } from '../../utils/errors';
+import { Google } from './types';
 
-export default async function redirect({ options }) {
+export default async function redirect({ options }: Google.RedirectOptions): Promise<string> {
 	const {
 		clientId,
 		redirectUrl,

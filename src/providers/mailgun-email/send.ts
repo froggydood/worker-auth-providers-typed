@@ -1,13 +1,16 @@
-import { getFixedDigitRandomNumber } from '../../utils/helpers';
+import { checkValidResponse, getFixedDigitRandomNumber } from '../../utils/helpers';
 import { ConfigError, UnknownError } from '../../utils/errors';
+import { MailgunEmail } from './types';
 
-function urlEncodeObject(obj) {
+function urlEncodeObject(obj: Record<string, unknown>): string {
 	return Object.keys(obj)
-		.map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(obj[k])}`)
+		.map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(obj[k] as string)}`)
 		.join('&');
 }
 
-function sendMail({ params, apiKey, baseUrl }) {
+async function sendMail({
+	params, apiKey, baseUrl
+}: MailgunEmail.SendMailOptions): Promise<MailgunEmail.SendMailResponse> {
 	const dataUrlEncoded = urlEncodeObject(params);
 	const opts = {
 		method: 'POST',
@@ -19,10 +22,15 @@ function sendMail({ params, apiKey, baseUrl }) {
 		body: dataUrlEncoded
 	};
 
-	return fetch(`${baseUrl}/messages`, opts);
+	const res = await fetch(`${baseUrl}/messages`, opts);
+	await checkValidResponse(res)
+	return await res.json() as MailgunEmail.SendMailResponse
+
 }
 
-export default async function send({ options }) {
+export default async function send({
+	options
+}: MailgunEmail.SendOptions): Promise<MailgunEmail.SendMailResponse> {
 	const {
 		from,
 		to,
@@ -47,8 +55,6 @@ export default async function send({ options }) {
 		? html.replace('{OTP}', otp)
 		: text.replace('{OTP}', otp);
 
-	console.log('[region otp]', otp, otpMessage);
-
 	const params = {
 		from,
 		to,
@@ -58,16 +64,15 @@ export default async function send({ options }) {
 
 	try {
 		const res = await sendMail({ params, baseUrl, apiKey });
-		console.log('[success send]', res);
+		
 		const savedData = await kvProvider.put(to, otp, {
 			expirationTtl
 		});
-		console.log('[savedData]', savedData);
+		
 		return res;
 	} catch (e) {
-		console.log('[error]', e.stack);
 		throw new UnknownError({
-			message: 'e.stack'
+			message: (e as {stack: string})?.stack
 		});
 	}
 }

@@ -20,7 +20,7 @@ async function getTokensFromCode(
 	code,
 	{ clientId, clientSecret, redirectUrl, scope = 'identify' }
 ) {
-	console.log('[redirectUrl]', redirectUrl);
+	;
 	const data = {
 		'client_id': clientId,
 		'client_secret': clientSecret,
@@ -37,7 +37,7 @@ async function getTokensFromCode(
     });
 
 	const result = await response.json();
-	console.log('[tokens]', result);
+	;
 
 	if (result.error) {
 		throw new TokenError({
@@ -55,10 +55,10 @@ async function getUser(oauthData) {
 			}
 		});
 		const data = await getUserResponse.json();
-		console.log('[provider user data]', data);
+		;
 		return data;
 	} catch (e) {
-		console.log('[get user error]', e);
+		;
 		throw new ProviderGetUserError({
 			message: 'There was an error fetching the user'
 		});
@@ -67,7 +67,7 @@ async function getUser(oauthData) {
 
 export default async function callback({ options, request }) {
 	const { query }: any = parseQuerystring(request);
-	console.log('[query]', query);
+	;
 	if (!query.code) {
 		throw new ConfigError({
 			message: 'No code is paased!'

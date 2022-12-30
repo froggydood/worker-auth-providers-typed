@@ -1,8 +1,16 @@
+export interface ErrorArgs  {
+	name?: string,
+	message: string
+}
 export class UnknownError extends Error {
-	constructor({ name = 'UnknownError', message }) {
+	constructor({ name = 'UnknownError', message }: ErrorArgs) {
 		super(message);
 		this.name = name;
 	}
+}
+
+export class HTTPError extends UnknownError {
+	name = 'HTTPError'
 }
 
 export class ConfigError extends UnknownError {

@@ -1,35 +1,33 @@
 import * as queryString from "query-string";
+import { BaseProvider, OAuthTokens } from "../../types";
 import { ConfigError, ProviderGetUserError, TokenError } from '../../utils/errors';
-import { parseQuerystring } from '../../utils/helpers';
+import { checkTokenResponseError, checkValidResponse, parseQuerystring } from '../../utils/helpers';
+import { Spotify } from "./types";
 
-async function getTokensFromCode(code, { clientId, clientSecret, redirectUrl }) {
-  console.log('[redirectUrl]', redirectUrl);
-
-  const params = queryString.stringify({
-    redirect_uri: redirectUrl,
-    code,
-    grant_type: 'authorization_code',
-  });
-  const token = btoa(`${clientId}:${clientSecret}`);
-  const response = await fetch(`https://accounts.spotify.com/api/token?${params}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': `Basic ${token}`,
-    },
-  });
-  const result = await response.json();
-  console.log('[tokens]', result);
-
-  if (result.error) {
-    throw new TokenError({
-      message: result.error_description,
-    });
-  }
-  return result;
+async function getTokensFromCode(
+	code: string,
+	{ clientId, clientSecret, redirectUrl }: BaseProvider.TokensFromCodeOptions
+): Promise<OAuthTokens> {
+	const params = queryString.stringify({
+		redirect_uri: redirectUrl,
+		code,
+		grant_type: 'authorization_code',
+	});
+	const token = btoa(`${clientId}:${clientSecret}`);
+	const response = await fetch(`https://accounts.spotify.com/api/token?${params}`, {
+		method: 'POST',
+		headers: {
+		'Content-Type': 'application/x-www-form-urlencoded',
+		'Authorization': `Basic ${token}`,
+		},
+	});
+	const result = await response.json();
+	checkTokenResponseError(result)
+	checkValidResponse(response)
+	return result as OAuthTokens;
 }
 
-async function getUser(token) {
+async function getUser(token: string): Promise<Spotify.UserResponse> {
   try {
     const getUserResponse = await fetch(
       'https://api.spotify.com/v1/me',
@@ -40,22 +38,22 @@ async function getUser(token) {
       },
     );
     const data = await getUserResponse.json();
-    console.log('[provider user data]', data);
-    return data;
+    return data as Spotify.UserResponse;
   } catch (e) {
-    console.log('[get user error]', e);
     throw new ProviderGetUserError({
       message: 'There was an error fetching the user',
     });
   }
 }
 
-export default async function callback({ options, request }) {
+export default async function callback({
+	options, request
+}: BaseProvider.CallbackOptions): Promise<Spotify.CallbackResponse> {
     const { query }: any = parseQuerystring(request);
-    console.log('[query]', query);
+    
     if (!query.code) {
       throw new ConfigError({
-        message: 'No code is paased!',
+        message: 'No code is passed!',
       });
     }
     const tokens = await getTokensFromCode(query.code, options);

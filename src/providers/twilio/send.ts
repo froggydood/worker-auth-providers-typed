@@ -1,7 +1,11 @@
 import { getFixedDigitRandomNumber } from '../../utils/helpers';
 import { ConfigError, UnknownError } from '../../utils/errors';
+import { BaseProvider } from '../../types';
+import { Twilio } from './types';
 
-export default async function send({ options }) {
+export default async function send({
+	options
+}: BaseProvider.SendOptions): Promise<Twilio.Message> {
 	const {
 		region,
 		otpLength = 4,
@@ -23,8 +27,6 @@ export default async function send({ options }) {
 	}
 
 	const otpMessage = message.replace('{OTP}', otp);
-
-	console.log('[region otp]', phone, region, otp, otpMessage);
 
 	const encoded = new URLSearchParams();
 	encoded.append('To', phone);
@@ -48,10 +50,10 @@ export default async function send({ options }) {
 		const savedData = await kvProvider.put(phone, otp, {
 			expirationTtl
 		});
-		console.log('[savedData]', savedData);
-		return data;
+		
+		return data as Twilio.Message;
 	} catch (e) {
-		console.log('[error]', e.stack);
+		
 		throw new UnknownError({
 			message: 'e.stack'
 		});

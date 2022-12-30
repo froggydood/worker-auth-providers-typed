@@ -2,7 +2,7 @@ import { ConfigError, ProviderGetUserError, TokenError } from '../../utils/error
 import { parseQuerystring } from '../../utils/helpers';
 
 async function getTokensFromCode(code, { clientId, clientSecret, redirectUrl }) {
-  console.log('[redirectUrl]', redirectUrl);
+  ;
 
   const params = {
     client_id: clientId,
@@ -20,7 +20,7 @@ async function getTokensFromCode(code, { clientId, clientSecret, redirectUrl }) 
     body: JSON.stringify(params),
   });
   const result = await response.json();
-  console.log('[tokens]', result);
+  ;
 
   if (result.error) {
     throw new TokenError({
@@ -36,10 +36,10 @@ async function getUser(token, fields = 'id,email,first_name,last_name') {
       `https://graph.facebook.com/me?fields=${fields}&access_token=${token}`
     );
     const data = await getUserResponse.json();
-    console.log('[provider user data]', data);
+    ;
     return data;
   } catch (e) {
-    console.log('[get user error]', e);
+    ;
     throw new ProviderGetUserError({
       message: 'There was an error fetching the user',
     });
@@ -48,7 +48,7 @@ async function getUser(token, fields = 'id,email,first_name,last_name') {
 
 export default async function callback({ options, request }) {
     const { query }: any = parseQuerystring(request);
-    console.log('[query]', query);
+    ;
     if (!query.code) {
       throw new ConfigError({
         message: 'No code is paased!',
