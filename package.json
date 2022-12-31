@@ -1,5 +1,5 @@
 {
-  "name": "worker-auth-providers",
+  "name": "worker-auth-providers-typed",
   "version": "0.0.10-beta7",
   "type": "module",
   "main": "src/index.ts",
