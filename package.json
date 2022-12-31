@@ -1,6 +1,6 @@
 {
   "name": "worker-auth-providers-typed",
-  "version": "0.0.10-beta7-4",
+  "version": "0.0.10-beta7-5",
   "type": "module",
   "main": "src/index.ts",
   "repository": "https://github.com/froggydood/worker-auth-providers-typed",

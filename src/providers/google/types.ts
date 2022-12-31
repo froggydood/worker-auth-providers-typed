@@ -4,7 +4,7 @@ export namespace Google {
 	export interface RedirectOptions {
 		options: {
 			clientId: string,
-			redirectUrl: String
+			redirectUrl?: String
 			scope?: string,
 			responseType?: string,
 			state?: string,

@@ -24,7 +24,7 @@ export namespace Facebook {
 	export interface RedirectOptions {
 		options: {
 			clientId: string,
-			redirectUrl: string,
+			redirectUrl?: string,
 			scope?: string,
 			responseType?: string,
 			authType?: string,

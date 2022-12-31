@@ -41,7 +41,7 @@ export namespace BaseProvider {
 	export interface TokensFromCodeOptions {
 		clientId: string,
 		clientSecret: string,
-		redirectUrl: string
+		redirectUrl?: string
 	}
 
 	export interface ApiError {
@@ -57,7 +57,7 @@ export namespace BaseProvider {
 	export interface RedirectOptions {
 		options: {
 			clientId: string,
-			redirectUrl: string,
+			redirectUrl?: string,
 			scope?: string,
 			responseType?: string,
 			showDialog?: boolean

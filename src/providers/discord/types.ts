@@ -4,7 +4,7 @@ export namespace Discord {
 	export interface GetTokenFromCodeOptions {
 		clientId: string,
 		clientSecret: string,
-		redirectUrl: string,
+		redirectUrl?: string,
 		scope?: string
 	}
 
@@ -34,7 +34,7 @@ export namespace Discord {
 	export interface RedirectOptions {
 		options: {
 			clientId: string,
-			redirectUrl: string,
+			redirectUrl?: string,
 			scope?: string,
 			responseType?: string,
 			prompt: string,
