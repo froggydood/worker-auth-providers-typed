@@ -37,11 +37,11 @@ export namespace Discord {
 			redirectUrl?: string,
 			scope?: string,
 			responseType?: string,
-			prompt: string,
-			permissions: string,
-			guildId: string,
-			disableGuildSelect: string,
-			state: string
+			prompt?: string,
+			permissions?: string,
+			guildId?: string,
+			disableGuildSelect?: string,
+			state?: string
 		}
 	}
 }

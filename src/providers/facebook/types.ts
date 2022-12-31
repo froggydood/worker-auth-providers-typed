@@ -12,7 +12,7 @@ export namespace Facebook {
 	export interface CallbackOptions {
 		request: Request
 		options: {
-			fields: string
+			fields?: string
 		} & BaseProvider.TokensFromCodeOptions
 	}
 
