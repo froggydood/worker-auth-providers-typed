@@ -25,7 +25,7 @@ async function getTokensFromCode(
     body: JSON.stringify(params),
   });
   const result = await response.json();
-  checkTokenResponseError(result)
+  await checkTokenResponseError(result)
   return result as OAuthTokens;
 }
 

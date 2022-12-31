@@ -1,8 +1,12 @@
+import { BaseProvider, OAuthTokens } from '../../types';
 import { ConfigError, ProviderGetUserError, TokenError } from '../../utils/errors';
-import { parseQuerystring } from '../../utils/helpers';
+import { checkTokenResponseError, checkValidResponse, parseQuerystring } from '../../utils/helpers';
+import { Facebook } from './types';
 
-async function getTokensFromCode(code, { clientId, clientSecret, redirectUrl }) {
-  ;
+async function getTokensFromCode(
+	code: string,
+	{ clientId, clientSecret, redirectUrl }: BaseProvider.TokensFromCodeOptions
+): Promise<OAuthTokens> {
 
   const params = {
     client_id: clientId,
@@ -20,23 +24,24 @@ async function getTokensFromCode(code, { clientId, clientSecret, redirectUrl }) 
     body: JSON.stringify(params),
   });
   const result = await response.json();
-  ;
 
-  if (result.error) {
-    throw new TokenError({
-      message: result.error_description,
-    });
-  }
-  return result;
+  await checkTokenResponseError(result)
+  await checkValidResponse(response)
+
+  return result as OAuthTokens;
 }
 
-async function getUser(token, fields = 'id,email,first_name,last_name') {
+async function getUser(
+	token: string,
+	fields = 'id,email,first_name,last_name'
+): Promise<Facebook.UserResponse> {
   try {
     const getUserResponse = await fetch(
       `https://graph.facebook.com/me?fields=${fields}&access_token=${token}`
     );
-    const data = await getUserResponse.json();
-    ;
+    const data = await getUserResponse.json() as Facebook.UserResponse;
+	await checkValidResponse(getUserResponse)
+
     return data;
   } catch (e) {
     ;
@@ -46,9 +51,9 @@ async function getUser(token, fields = 'id,email,first_name,last_name') {
   }
 }
 
-export default async function callback({ options, request }) {
-    const { query }: any = parseQuerystring(request);
-    ;
+export default async function callback({ options, request }: Facebook.CallbackOptions): Promise<Facebook.CallbackResponse> {
+    const { query } = parseQuerystring(request);
+    
     if (!query.code) {
       throw new ConfigError({
         message: 'No code is paased!',

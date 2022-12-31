@@ -1,11 +1,13 @@
+import { BaseProvider, OAuthTokens } from '../../types';
 import {
 	ConfigError,
 	ProviderGetUserError,
 	TokenError
 } from '../../utils/errors';
-import { parseQuerystring } from '../../utils/helpers';
+import { checkTokenResponseError, checkValidResponse, parseQuerystring } from '../../utils/helpers';
+import { Discord } from './types';
 
-function _encode(obj) {
+function _encode(obj: Record<string, unknown>): string {
 	let string = "";
   
 	for (const [key, value] of Object.entries(obj)) {
@@ -17,9 +19,9 @@ function _encode(obj) {
 }
   
 async function getTokensFromCode(
-	code,
-	{ clientId, clientSecret, redirectUrl, scope = 'identify' }
-) {
+	code: string,
+	{ clientId, clientSecret, redirectUrl, scope = 'identify' }: Discord.GetTokenFromCodeOptions
+): Promise<OAuthTokens> {
 	;
 	const data = {
 		'client_id': clientId,
@@ -37,26 +39,25 @@ async function getTokensFromCode(
     });
 
 	const result = await response.json();
-	;
+	
+	await checkTokenResponseError(result)
+	await checkValidResponse(response);
 
-	if (result.error) {
-		throw new TokenError({
-			message: result.error_description
-		});
-	}
-	return result;
+	return result as OAuthTokens;
 }
 
-async function getUser(oauthData) {
+async function getUser(oauthData: OAuthTokens): Promise<Discord.UserResponse> {
 	try {
 		const getUserResponse = await fetch('https://discord.com/api/users/@me', {
 			headers: {
 				authorization: `${oauthData.token_type} ${oauthData.access_token}`,
 			}
 		});
+		await checkValidResponse(getUserResponse)
+
 		const data = await getUserResponse.json();
-		;
-		return data;
+		
+		return data as Discord.UserResponse;
 	} catch (e) {
 		;
 		throw new ProviderGetUserError({
@@ -65,9 +66,9 @@ async function getUser(oauthData) {
 	}
 }
 
-export default async function callback({ options, request }) {
-	const { query }: any = parseQuerystring(request);
-	;
+export default async function callback({ options, request }: BaseProvider.CallbackOptions): Promise<Discord.CallbackResponse> {
+	const { query } = parseQuerystring(request);
+	
 	if (!query.code) {
 		throw new ConfigError({
 			message: 'No code is paased!'

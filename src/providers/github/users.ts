@@ -1,7 +1,12 @@
+import { BaseProvider, OAuthTokens } from '../../types';
 import { ConfigError, ProviderGetUserError, TokenError } from '../../utils/errors';
-import { parseQuerystring } from '../../utils/helpers';
+import { checkTokenResponseError, checkValidResponse, parseQuerystring } from '../../utils/helpers';
+import { Github } from "./types"
 
-async function getTokensFromCode(code, { clientId, clientSecret }) {
+async function getTokensFromCode(
+	code: string,
+	{ clientId, clientSecret }: BaseProvider.TokensFromCodeOptions
+): Promise<OAuthTokens> {
   const params = {
     client_id: clientId,
     client_secret: clientSecret,
@@ -20,30 +25,27 @@ async function getTokensFromCode(code, { clientId, clientSecret }) {
     },
   );
   const result = await response.json();
-  ;
 
-  if (result.error) {
-    throw new TokenError({
-      message: result.error_description,
-    });
-  }
-  return result;
+  await checkTokenResponseError(result)
+  await checkValidResponse(response)
+  return result as OAuthTokens;
 }
 
-async function getUser(token) {
+async function getUser(token: string): Promise<Github.UserResponse> {
   try {
     const headers = {
       accept: 'application/vnd.github.v3+json',
       authorization: `token ${token}`,
       'user-agent': 'cool-bio-analytics-github-oauth-login',
     };
-    ;
-      const getUserResponse = await fetch('https://api.github.com/user', {
+
+	const getUserResponse = await fetch('https://api.github.com/user', {
       method: 'GET',
       headers,
     });
-    const data = await getUserResponse.json();
-    ;
+	await checkValidResponse(getUserResponse)
+    const data = await getUserResponse.json() as Github.UserResponse;
+
     if (!data.email) {
           // If the user does not have a public email, get another via the GitHub API
           // See https://docs.github.com/en/rest/users/emails#list-public-email-addresses-for-the-authenticated-user
@@ -51,23 +53,26 @@ async function getUser(token) {
                 method: 'GET',
                 headers,
           });
-          const emails = await res.json()
-          ;
+          const emails = await res.json() as Github.EmailResponse[]
+		  await checkValidResponse(res)
+
           data.emails = emails
           data.email = (emails.find((e) => e.primary) ?? emails[0]).email
     }
     return data;
   } catch (e) {
-    ;
+    
     throw new ProviderGetUserError({
       message: 'There was an error fetching the user',
     });
   }
 }
 
-export default async function callback({ options, request }) {
-  const { query }: any = parseQuerystring(request);
-  ;
+export default async function callback({
+	options, request
+}: BaseProvider.CallbackOptions): Promise<Github.CallbackResponse> {
+  const { query } = parseQuerystring(request);
+  
   if (!query.code) {
     throw new ConfigError({
       message: 'No code is paased!',

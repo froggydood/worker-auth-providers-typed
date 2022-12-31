@@ -22,8 +22,8 @@ async function getTokensFromCode(
 		},
 	});
 	const result = await response.json();
-	checkTokenResponseError(result)
-	checkValidResponse(response)
+	await checkTokenResponseError(result)
+	await checkValidResponse(response)
 	return result as OAuthTokens;
 }
 
@@ -49,7 +49,7 @@ async function getUser(token: string): Promise<Spotify.UserResponse> {
 export default async function callback({
 	options, request
 }: BaseProvider.CallbackOptions): Promise<Spotify.CallbackResponse> {
-    const { query }: any = parseQuerystring(request);
+    const { query } = parseQuerystring(request);
     
     if (!query.code) {
       throw new ConfigError({

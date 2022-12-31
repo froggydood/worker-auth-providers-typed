@@ -1,7 +1,9 @@
 import * as queryString from 'query-string';
+import { BaseProvider } from '../../types';
 import { ConfigError } from '../../utils/errors';
+import { Facebook } from './types';
 
-export default async function redirect({ options }) {
+export default async function redirect({ options }: Facebook.RedirectOptions): Promise<string> {
 	const {
 		clientId,
 		redirectUrl,

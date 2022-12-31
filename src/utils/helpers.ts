@@ -3,7 +3,7 @@ import { HTTPError, TokenError } from "./errors";
 
 export interface ParsedQueryString {
 	url: URL,
-	query: Record<string, any>
+	query: Record<string, string>
 }
 export function parseQuerystring(request: Request): ParsedQueryString  {
 	const replacedUrl = request.url.replace(/#/g, '?');

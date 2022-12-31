@@ -1,7 +1,11 @@
 import * as queryString from "query-string";
+import { BaseProvider } from "../../types";
 import { ConfigError } from "../../utils/errors";
+import { Github } from "./types";
 
-export default async function redirect({ options }) {
+export default async function redirect({
+	options
+}: BaseProvider.RedirectOptions): Promise<string> {
   const { clientId } = options;
   if (!clientId) {
     throw new ConfigError({
