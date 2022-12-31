@@ -1,6 +1,6 @@
 <p align="center"><img src="/logo.png" alt="worker-auth-providers" width="120px"></p>
 
-<h1 align="center">worker-auth-providers</h1>
+<h1 align="center"> This is a fork of worker-auth-providers, that adds proper typescript typings</h1>
 
 <p align="center">
 An open-source auth providers for <a href="https://workers.cloudflare.com/">Cloudflare workers</a>
