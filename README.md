@@ -1,6 +1,6 @@
 <p align="center"><img src="/logo.png" alt="worker-auth-providers" width="120px"></p>
 
-<h1 align="center"> This is a fork of worker-auth-providers, that adds proper typescript typings</h1>
+<h1 align="center">worker-auth-providers-typed</h1>
 
 <p align="center">
 An open-source auth providers for <a href="https://workers.cloudflare.com/">Cloudflare workers</a>
@@ -17,6 +17,8 @@ An open-source auth providers for <a href="https://workers.cloudflare.com/">Clou
 
 
 </p>
+This is a fork of worker-auth-providers, that adds proper typescript typings
+
 worker-auth-providers is an open-source providers to make authentication easy with workers. Very lightweight script which doesn't need a lot of dependencies. Plug it with any framework or template of workers.
 
 ## 🚀 Demo
